@@ -1,0 +1,19 @@
+{
+  "name": "start-page",
+  "version": "2.0.0",
+  "description": "A local browser start page: clock, weather, calendar, news and GitHub.",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node launcher.js"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "node-ical": "^0.27.2",
+    "resedit": "^3.1.0"
+  }
+}

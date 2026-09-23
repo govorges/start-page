@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set up your start page</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/setup.css">
+</head>
+<body>
+<aside>
+  <div>
+    <div class="brand"><div class="mark">~/</div>Start Page <span>/ setup</span></div>
+    <nav class="steps" aria-label="Setup steps" id="steps"></nav>
+  </div>
+  <div class="privacy" id="privacy"></div>
+</aside>
+
+<main>
+  <div class="progress" aria-hidden="true"><div id="progress" style="width:0"></div></div>
+  <div class="content">
+
+    <!-- 1. Welcome -->
+    <section class="step" data-step="welcome" hidden>
+      <div class="step-head">
+        <div class="label">Welcome</div>
+        <h1 tabindex="-1">Set up your start page</h1>
+        <p>Connect the services your start page reads from. Each step shows exactly where to find what it needs, then checks that it works before you move on.</p>
+      </div>
+      <div class="services" id="services"></div>
+      <div class="powers" id="welcome-note"></div>
+    </section>
+
+    <!-- 2. Location -->
+    <section class="step" data-step="location" hidden>
+      <div class="step-head">
+        <div class="label" data-steplabel></div>
+        <h1 tabindex="-1">Location &amp; weather</h1>
+        <p>Your location sets the weather, forecast and alerts, and suggests local news sources in a later step.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px" role="radiogroup" aria-label="How to find your location">
+        <label class="radio-card">
+          <input type="radio" name="locmode" value="browser">
+          <span class="dot"></span>
+          <span class="body"><span class="t">Use my current location</span><span class="s">Your browser will ask for permission. This is the most precise option.</span></span>
+        </label>
+        <label class="radio-card">
+          <input type="radio" name="locmode" value="search">
+          <span class="dot"></span>
+          <span class="body"><span class="t">Enter a city or ZIP code</span><span class="s">Use this if you decline location access or want a different place.</span></span>
+        </label>
+      </div>
+      <form id="loc-search" class="field" hidden>
+        <label for="loc-q">City or ZIP code</label>
+        <div style="display:flex;gap:8px">
+          <div class="input-wrap" style="flex:1"><input id="loc-q" autocomplete="off" placeholder="e.g. Union, NJ"></div>
+          <button class="btn btn-lg" type="submit">Search</button>
+        </div>
+        <div class="results" id="loc-results"></div>
+      </form>
+      <div id="loc-status"></div>
+      <div class="panel">
+        <div class="row-toggle">
+          <div><div class="t">Temperature units</div><div class="s">Picked from your country. Change it any time.</div></div>
+          <div class="seg" role="radiogroup" aria-label="Temperature units" id="units">
+            <button type="button" role="radio" data-value="fahrenheit" aria-checked="true">°F</button>
+            <button type="button" role="radio" data-value="celsius" aria-checked="false">°C</button>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="row-toggle">
+          <div><div class="t" id="alerts-label">Severe-weather alerts</div><div class="s" id="alerts-sub">From the National Weather Service. US locations only.</div></div>
+          <button type="button" class="switch" role="switch" aria-checked="true" aria-labelledby="alerts-label" id="alerts"></button>
+        </div>
+      </div>
+      <div class="powers" data-powers="cloud">Fills on your dashboard: <b>weather button, forecast panel and alert banner</b></div>
+    </section>
+
+    <!-- 3. Calendar -->
+    <section class="step" data-step="calendar" hidden>
+      <div class="step-head">
+        <div class="label" data-steplabel></div>
+        <h1 tabindex="-1">Connect Google Calendar</h1>
+        <p>Your start page reads your calendar through its secret iCal address, so there’s no Google sign-in and it can’t change anything.</p>
+      </div>
+      <div class="panel howto">
+        <div class="label">Where to find it</div>
+        <ol>
+          <li><div class="txt">Open Google Calendar on the web: <a class="chip" href="https://calendar.google.com/calendar/r/settings" target="_blank" rel="noopener">calendar.google.com</a></div></li>
+          <li><div class="txt">Click the gear icon, then <b>Settings</b>.</div></li>
+          <li><div class="txt">Under <b>Settings for my calendars</b>, choose the calendar you want to show.</div></li>
+          <li><div class="txt">Scroll to <b>Integrate calendar</b> and copy <b>Secret address in iCal format</b>.
+            <div class="hint">It ends in <span class="chip">/basic.ics</span>. Not the Public URL, the embed code or the link in your address bar.</div></div></li>
+        </ol>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px" id="cal-list"></div>
+      <div><button type="button" class="btn btn-sm" id="cal-add"></button></div>
+      <div id="cal-note"></div>
+    </section>
+
+    <!-- 4. GitHub -->
+    <section class="step" data-step="github" hidden>
+      <div class="step-head">
+        <div class="label" data-steplabel></div>
+        <h1 tabindex="-1">Connect GitHub</h1>
+        <p>A personal access token lets your start page read your notifications, pull requests and activity. Keep it private: classic tokens can’t be limited to read-only.</p>
+      </div>
+      <div class="panel howto">
+        <div class="label">Where to find it</div>
+        <ol>
+          <li><div class="txt">Go to <a class="chip" href="https://github.com/settings/tokens" target="_blank" rel="noopener">github.com/settings/tokens</a> and open <b>Tokens (classic)</b>.
+            <div class="hint">Fine-grained tokens can’t read notifications, so this needs a classic token.</div></div></li>
+          <li><div class="txt">Click <b>Generate new token (classic)</b>. Name it <span class="chip">start-page</span> and set an expiration.</div></li>
+          <li><div class="txt">Tick only these scopes:
+            <div class="scopes">
+              <div><span><code>notifications</code>&nbsp; your inbox</span><small>required</small></div>
+              <div><span><code>read:user</code>&nbsp; your profile and contributions</span><small>required</small></div>
+              <div><span><code>repo</code>&nbsp; only if you want private repositories</span><small>optional</small></div>
+            </div></div></li>
+          <li><div class="txt">Click <b>Generate token</b> and copy it right away.<div class="hint">GitHub shows the token only once.</div></div></li>
+        </ol>
+      </div>
+      <div class="field">
+        <label for="gh-token">Personal access token</label>
+        <div class="input-wrap" id="gh-token-wrap">
+          <input id="gh-token" class="mono" type="password" autocomplete="off" spellcheck="false" placeholder="ghp_…">
+          <button type="button" class="suffix" id="gh-show" aria-label="Show token" aria-pressed="false"></button>
+        </div>
+      </div>
+      <div id="gh-status"></div>
+      <div class="check-list" id="gh-repos" hidden>
+        <div class="head">
+          <div><div class="list-title">Repositories to follow</div><div class="list-sub" id="gh-repo-count"></div></div>
+          <button type="button" class="btn-link" id="gh-select-all">Select all</button>
+        </div>
+        <div id="gh-repo-list"></div>
+      </div>
+      <div class="check-list" id="gh-accounts" hidden>
+        <div class="head">
+          <div><div class="list-title">People and organizations to follow</div><div class="list-sub" id="gh-account-count"></div></div>
+          <button type="button" class="btn-link" id="gh-accounts-all">Select all</button>
+        </div>
+        <div id="gh-account-list"></div>
+      </div>
+    </section>
+
+    <!-- 5. News -->
+    <section class="step" data-step="news" hidden>
+      <div class="step-head">
+        <div class="label" data-steplabel></div>
+        <h1 tabindex="-1">News</h1>
+        <p>Pick what shows in Headlines. You can skip this and add sources later.</p>
+      </div>
+      <div class="panel">
+        <div class="row-toggle">
+          <div><div class="t" id="ap-label">AP world headlines</div><div class="s">Top stories from apnews.com.</div></div>
+          <button type="button" class="switch" role="switch" aria-checked="true" aria-labelledby="ap-label" id="ap"></button>
+        </div>
+      </div>
+      <div class="check-list">
+        <div class="head"><div><div class="ink" style="font-size:14px;font-weight:500">Local sources</div><div class="muted" style="font-size:12.5px" id="news-sub"></div></div></div>
+        <div id="feed-list"></div>
+      </div>
+      <form class="field" id="feed-form">
+        <label for="feed-url">Add a source by RSS feed address</label>
+        <div style="display:flex;gap:8px">
+          <div class="input-wrap" style="flex:1"><input id="feed-url" class="mono" autocomplete="off" spellcheck="false" placeholder="https://example.com/feed/"></div>
+          <button class="btn btn-lg" type="submit" id="feed-add"></button>
+        </div>
+      </form>
+      <div id="feed-status"></div>
+      <p class="muted" style="font-size:13px">Some sites block feed readers. If one can’t be read, you’ll see why here before it’s added.</p>
+    </section>
+
+    <!-- 6. Server -->
+    <section class="step" data-step="server" hidden>
+      <div class="step-head">
+        <div class="label" data-steplabel></div>
+        <h1 tabindex="-1">Server</h1>
+        <p>Choose when the local server runs and how your browser reaches it. The defaults suit most people, and you can change them later in Settings.</p>
+      </div>
+      <div class="panel">
+        <div><h2>When it runs</h2><div class="sub">The page only works while the server is running.</div></div>
+        <div style="display:flex;flex-direction:column;gap:8px" role="radiogroup" aria-label="When the server runs">
+          <label class="radio-card"><input type="radio" name="runmode" value="signin"><span class="dot"></span>
+            <span class="body"><span class="t">When I sign in to Windows <span class="tag-accent">Recommended</span></span><span class="s">Adds a shortcut to your Startup folder. No admin rights needed.</span></span></label>
+          <label class="radio-card"><input type="radio" name="runmode" value="service"><span class="dot"></span>
+            <span class="body"><span class="t">Always, as a background task</span><span class="s">Starts with Windows before anyone signs in. Windows asks for administrator approval once.</span></span></label>
+          <label class="radio-card"><input type="radio" name="runmode" value="manual"><span class="dot"></span>
+            <span class="body"><span class="t">Only when I start it</span><span class="s">Open <span class="chip">Start Page</span> from the Start menu when you want it.</span></span></label>
+        </div>
+        <div class="divider"></div>
+        <div class="row-toggle"><div><div class="t" id="restart-label">Restart if it stops unexpectedly</div><div class="s">Tries again after 5 seconds, up to 5 times in a row.</div></div>
+          <button type="button" class="switch" role="switch" aria-checked="true" aria-labelledby="restart-label" id="srv-restart"></button></div>
+        <div class="row-toggle"><div><div class="t" id="open-label">Open the page when the server starts</div><div class="s">Opens your default browser at the address below.</div></div>
+          <button type="button" class="switch" role="switch" aria-checked="false" aria-labelledby="open-label" id="srv-open"></button></div>
+      </div>
+      <div class="panel">
+        <div><h2>Network</h2><div class="sub">Where the server listens for your browser.</div></div>
+        <div style="display:flex;flex-direction:column;gap:8px" role="radiogroup" aria-label="Network access">
+          <label class="radio-card"><input type="radio" name="bind" value="127.0.0.1"><span class="dot"></span>
+            <span class="body"><span class="t">This computer only <span class="chip">127.0.0.1</span> <span class="tag-accent">Recommended</span></span><span class="s">Nothing else on your network can open the page.</span></span></label>
+          <label class="radio-card"><input type="radio" name="bind" value="0.0.0.0"><span class="dot"></span>
+            <span class="body"><span class="t">Any device on my network <span class="chip">0.0.0.0</span></span><span class="s">Lets your phone or another computer open the dashboard. Setup and settings still only open on this computer.</span>
+            <span class="w" id="bind-warn"></span></span></label>
+        </div>
+        <div class="port-grid">
+          <div class="field"><label for="srv-port">Port</label><div class="input-wrap"><input id="srv-port" class="mono" inputmode="numeric" maxlength="5"></div></div>
+          <div id="port-status"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div><h2>Refresh intervals</h2><div class="sub">How often the server asks each service for new data. Shorter intervals use more of each service’s rate limit.</div></div>
+        <div id="refresh-rows"></div>
+      </div>
+      <div class="panel">
+        <h2>Advanced</h2>
+        <div class="row-toggle"><div><div class="t" id="logs-label">Keep a log file</div><div class="s">Saved in the <span class="chip">logs</span> folder, kept for 7 days. Useful when something stops loading.</div></div>
+          <button type="button" class="switch" role="switch" aria-checked="true" aria-labelledby="logs-label" id="srv-logs"></button></div>
+        <div class="divider"></div>
+        <div class="row-toggle"><div><div class="t">Settings file</div><div class="s"><span class="chip" id="cfg-path" style="white-space:normal;overflow-wrap:anywhere"></span> · holds your addresses and token</div></div>
+          <button type="button" class="btn btn-sm" id="show-cfg">Show in folder</button></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="label">What will run</div>
+        <div class="cmdline"><span id="cmd-icon"></span><code class="cmd" id="cmd"></code></div>
+      </div>
+      <div id="srv-status"></div>
+    </section>
+
+    <!-- 7. Finish -->
+    <section class="step" data-step="finish" hidden>
+      <div class="step-head">
+        <div class="label" data-steplabel></div>
+        <h1 tabindex="-1" id="finish-title">You’re all set</h1>
+        <p id="finish-sub">Your start page is connected. Here’s what it will show.</p>
+      </div>
+      <div class="card"><div style="padding:14px 18px 10px" class="label">Connected</div><div id="summary"></div></div>
+      <div class="panel">
+        <div class="label">Make it your browser’s start page</div>
+        <div style="font-size:14px;line-height:1.6">In Chrome or Edge: <b class="ink" style="font-weight:500">Settings</b> → <b class="ink" style="font-weight:500">On startup</b> → <b class="ink" style="font-weight:500">Open a specific page</b>, then enter <span class="chip" id="final-url"></span>.
+        For new tabs as well, a new-tab extension such as “Custom New Tab URL” can point at the same address.</div>
+      </div>
+      <div id="finish-status"></div>
+    </section>
+  </div>
+
+  <footer class="nav">
+    <div><button type="button" class="btn btn-lg" id="back">Back</button></div>
+    <div class="r">
+      <button type="button" class="skip" id="skip" hidden>Skip for now</button>
+      <button type="button" class="btn btn-primary btn-lg" id="next">Continue</button>
+    </div>
+  </footer>
+</main>
+
+<script src="/assets/shared.js"></script>
+<script src="/assets/setup.js"></script>
+</body>
+</html>

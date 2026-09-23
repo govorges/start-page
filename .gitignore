@@ -1,0 +1,6 @@
+# Holds your calendar addresses and GitHub token: never commit it.
+config.json
+config.json.tmp
+node_modules/
+runtime/
+logs/

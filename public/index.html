@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Start Page</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/dashboard.css">
+</head>
+<body>
+<header class="bar">
+  <div class="brand"><div class="mark">~/</div>Start Page</div>
+  <div class="right">
+    <div id="date"></div>
+    <div class="wx-anchor">
+      <button type="button" class="wx-chip" id="wx-chip" aria-expanded="false" aria-controls="wx-panel" hidden>
+        <span id="wx-chip-icon"></span>
+        <span class="t" id="wx-chip-temp">–°</span>
+        <span class="c" id="wx-chip-cond"></span>
+        <span class="hl" id="wx-chip-hl"></span>
+        <span class="alert-dot" id="wx-chip-alert" title="Weather alert active" hidden></span>
+        <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8089a0" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div id="wx-panel" role="dialog" aria-label="Weather details" hidden>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="label" id="wx-place">Weather</div>
+          <button type="button" class="icon-btn" id="wx-close" aria-label="Close weather details" style="width:28px;height:28px"></button>
+        </div>
+        <div class="wx-now">
+          <span id="wx-icon"></span>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div class="temp" id="wx-temp"></div>
+            <div id="wx-cond"></div>
+          </div>
+          <div class="hl"><div class="ink" id="wx-hi"></div><div class="muted" id="wx-lo"></div></div>
+        </div>
+        <div id="wx-alerts" style="display:flex;flex-direction:column;gap:8px"></div>
+        <div class="wx-precip" id="wx-precip"></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="label" style="font-size:10.5px">Next 24 hours</div>
+          <div class="chart-wrap" id="hourly-wrap">
+            <svg id="hourly" viewBox="0 0 552 120" role="img" aria-label="Hourly temperature for the next 24 hours"></svg>
+            <div class="chart-tip" id="hourly-tip" hidden></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="label" style="font-size:10.5px">5-day</div>
+          <div class="days" id="wx-days"></div>
+        </div>
+        <div class="wx-foot"><span>Open-Meteo · National Weather Service</span><span id="wx-updated"></span></div>
+      </div>
+    </div>
+    <a class="icon-btn" href="/settings" id="settings-link" aria-label="Settings" title="Settings"></a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="clock-col">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div class="label" id="greeting"></div>
+      <div id="clock" aria-live="off"></div>
+    </div>
+    <div class="pills" id="pills"></div>
+  </div>
+  <section class="card side-card" id="cal-card" aria-labelledby="cal-title">
+    <div class="card-head">
+      <h2 class="label" id="cal-title">This week · Calendar</h2>
+      <div class="cal-tools">
+        <div class="mini-tabs" role="tablist" aria-label="Days to show" id="cal-mode">
+          <button type="button" role="tab" aria-selected="true" data-mode="week">This week</button>
+          <button type="button" role="tab" aria-selected="false" data-mode="next">Next 7 days</button>
+        </div>
+        <button type="button" class="icon-btn refresh-btn" id="cal-refresh" aria-label="Refresh calendar"></button>
+      </div>
+    </div>
+    <div id="events" class="week"><div class="empty">Loading…</div></div>
+  </section>
+  <section class="card side-card" id="news-card" aria-labelledby="news-title">
+    <div class="card-head">
+      <h2 class="label" id="news-title">Headlines</h2>
+      <div class="mini-tabs" role="tablist" aria-label="Headline source" id="news-tabs">
+        <button type="button" role="tab" aria-selected="true" data-tab="world">AP</button>
+        <button type="button" role="tab" aria-selected="false" data-tab="local">Local</button>
+      </div>
+    </div>
+    <div id="headlines"><div class="empty">Loading…</div></div>
+  </section>
+</section>
+
+<main>
+  <section class="card gh" id="gh" aria-labelledby="gh-title">
+    <div class="gh-head">
+      <div class="l">
+        <span id="gh-logo"></span>
+        <h2 class="gh-title" id="gh-title">GitHub</h2>
+        <a class="user-chip" id="gh-user" hidden></a>
+        <div class="unread-count" id="gh-unread" hidden></div>
+      </div>
+      <a href="https://github.com" class="mono" style="font-size:11px;color:var(--text)">Open GitHub →</a>
+    </div>
+    <div id="gh-msg" class="gh-msg" hidden></div>
+    <div class="gh-cols" id="gh-cols" hidden>
+      <div class="gh-col" id="col-contrib">
+        <div class="col-head"><h3 class="label">Contributions</h3><span class="col-meta" id="heat-range"></span></div>
+        <div class="contrib-body">
+          <div class="stat-row" id="stats"></div>
+          <div class="heat" id="heat"></div>
+        </div>
+      </div>
+      <div class="gh-col" id="col-inbox">
+        <div class="col-head"><h3 class="label">Inbox</h3><button type="button" class="btn-link" id="mark-all">Mark all read</button></div>
+        <div class="tabs" role="tablist" aria-label="Filter notifications" id="inbox-tabs"></div>
+        <div id="notes"></div>
+        <a class="foot-link" href="https://github.com/notifications">View all notifications →</a>
+      </div>
+      <div class="gh-col" id="col-mid">
+        <div class="col-head"><h3 class="label">Your open pull requests</h3><span class="mono muted" style="font-size:11px" id="pr-count"></span></div>
+        <div id="prs"></div>
+        <div class="col-head" style="border-top:1px solid var(--line)"><h3 class="label">Recent commits</h3></div>
+        <div class="commits" id="commits"></div>
+      </div>
+      <div class="gh-col" id="col-watch">
+        <div class="col-head"><h3 class="label">Watching</h3><span id="watch-icon"></span></div>
+        <div id="repos"></div>
+      </div>
+    </div>
+    <section class="activity" id="activity" aria-labelledby="act-title" hidden>
+      <div class="act-head">
+        <div class="act-titles">
+          <div class="act-title-row">
+            <h3 class="label" id="act-title">Activity</h3>
+            <div class="mini-tabs" role="tablist" aria-label="Show activity for" id="act-view">
+              <button type="button" role="tab" aria-selected="true" data-view="repos">Repositories</button>
+              <button type="button" role="tab" aria-selected="false" data-view="people">People &amp; orgs</button>
+            </div>
+          </div>
+          <div class="act-sub" id="act-sub"></div>
+        </div>
+        <div class="act-controls">
+          <div class="seg" role="radiogroup" aria-label="Metric" id="act-metric">
+            <button type="button" role="radio" data-value="commits" aria-checked="true">Commits</button>
+            <button type="button" role="radio" data-value="prs" aria-checked="false">Pull requests</button>
+            <button type="button" role="radio" data-value="issues" aria-checked="false">Issues</button>
+          </div>
+          <div class="seg" role="radiogroup" aria-label="Time range" id="act-range">
+            <button type="button" role="radio" data-value="7" aria-checked="false">7d</button>
+            <button type="button" role="radio" data-value="30" aria-checked="true">30d</button>
+            <button type="button" role="radio" data-value="90" aria-checked="false">90d</button>
+          </div>
+        </div>
+      </div>
+      <div class="act-grid" id="act-grid"></div>
+      <div class="act-foot"><span id="act-foot-note"></span><span id="act-updated"></span></div>
+    </section>
+  </section>
+</main>
+
+<script src="/assets/shared.js"></script>
+<script src="/assets/dashboard.js"></script>
+</body>
+</html>

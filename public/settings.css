@@ -1,0 +1,47 @@
+/* Settings page styles. Shared styles are in app.css. */
+.layout { display: flex; gap: 48px; justify-content: center; padding: 40px 40px 56px; }
+nav.side { width: 220px; flex-shrink: 0; position: sticky; top: 24px; align-self: flex-start; display: flex; flex-direction: column; gap: 2px; }
+nav.side a { display: flex; gap: 12px; align-items: center; height: 38px; padding: 0 12px; border-left: 2px solid transparent; border-radius: var(--r); font-size: 14px; color: var(--text); }
+nav.side a:hover { text-decoration: none; background: rgba(255,255,255,.03); }
+nav.side a[aria-current="true"] { background: rgba(255,255,255,.05); border-left-color: var(--accent); color: var(--ink); }
+nav.side .note { margin: 24px 12px 0; font-size: 12px; line-height: 1.5; color: var(--muted); }
+.col { width: 820px; max-width: 100%; display: flex; flex-direction: column; gap: 24px; }
+.col > h1 { font-size: 34px; font-weight: 500; color: var(--ink); }
+section.card { display: flex; flex-direction: column; gap: 14px; padding: 20px 22px; scroll-margin-top: 24px; }
+section h2 { font-size: 17px; font-weight: 500; color: var(--ink); }
+section .sub { font-size: 13px; line-height: 1.5; color: var(--muted); margin-top: 3px; }
+.head-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.tile { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: var(--r); background: rgba(255,255,255,.03); min-width: 0; }
+.tile .k { font: 10.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.tile .v { display: flex; align-items: center; gap: 7px; font: 13px var(--mono); color: var(--ink); overflow-wrap: anywhere; }
+.dot-ok { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); flex-shrink: 0; }
+.env { display: flex; align-items: center; gap: 7px; min-width: 0; overflow-wrap: normal; white-space: nowrap; }
+.env-badge { flex-shrink: 0; padding: 1px 6px; border-radius: 2px; font: 600 11px var(--mono); letter-spacing: .04em; text-transform: uppercase; color: #0d0f14; }
+.env-badge.live { background: #fa6e1d; }
+.env-badge.test { background: #4db649; }
+.conn { display: flex; gap: 14px; align-items: center; padding: 13px 0; border-top: 1px solid var(--line3); }
+.conn .mk { width: 20px; height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 2px; }
+.conn .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.conn .t { font-size: 14px; font-weight: 500; color: var(--ink); }
+.conn .d { font: 11.5px var(--mono); color: var(--muted); }
+.swatches { display: flex; gap: 10px; padding-right: 4px; }
+.swatches button { width: 26px; height: 26px; padding: 0; border: 0; border-radius: 2px; }
+.swatches button[aria-checked="true"] { box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--ink); }
+.swatches button.auto { font: 600 12px var(--mono); color: #0d0f14; }
+.danger { border-color: rgba(240,80,110,.45); gap: 4px; }
+.danger-row { display: flex; gap: 16px; align-items: center; padding: 16px 0; border-top: 1px solid rgba(240,80,110,.2); }
+.danger-row .grow { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.danger-row .t { font-size: 14.5px; font-weight: 500; color: var(--ink); }
+.danger-row .d { font-size: 13px; line-height: 1.5; color: var(--muted); }
+.removed { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line3); font-size: 13.5px; color: var(--ink); }
+.removed span:last-child { font: 11.5px var(--mono); color: var(--muted); text-align: right; }
+.stopped { max-width: 560px; margin: 12vh auto; padding: 0 24px; display: flex; flex-direction: column; gap: 16px; }
+.stopped h1 { font-size: 30px; font-weight: 500; color: var(--ink); }
+@media (max-width: 1000px) {
+  .layout { flex-direction: column; padding: 24px 16px; gap: 20px; }
+  nav.side { position: static; width: auto; flex-direction: row; flex-wrap: wrap; }
+  nav.side .note, nav.side .label { display: none; }
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bar { padding: 0 16px; }
+}

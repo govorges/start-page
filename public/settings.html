@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings · Start Page</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/settings.css">
+</head>
+<body>
+<header class="bar">
+  <div class="brand"><div class="mark">~/</div>Start Page <span>/ settings</span></div>
+  <a class="btn btn-sm" href="/">← Back to start page</a>
+</header>
+
+<div class="layout" id="layout">
+  <nav class="side" aria-label="Settings sections" id="side">
+    <div class="label" style="padding:0 12px 12px">Settings</div>
+  </nav>
+  <div class="col">
+    <h1>Settings</h1>
+    <div id="banner"></div>
+
+    <section class="card" id="status" aria-labelledby="status-h">
+      <div class="head-row">
+        <h2 id="status-h">Status</h2>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="btn btn-sm" id="restart"></button>
+          <button type="button" class="btn btn-sm" id="stop"></button>
+        </div>
+      </div>
+      <div class="tiles" id="tiles"></div>
+      <div class="muted" style="font-size:13px" id="status-note"></div>
+    </section>
+
+    <section class="card" id="connections" aria-labelledby="conn-h" style="gap:10px">
+      <div><h2 id="conn-h">Connections</h2><div class="sub">Change an address or token, or reconnect something that stopped working.</div></div>
+      <div id="conn-list"></div>
+    </section>
+
+    <section class="card" id="dashboard" aria-labelledby="dash-h">
+      <div><h2 id="dash-h">Dashboard</h2><div class="sub">Choose what shows on your start page and how it looks. Changes save right away.</div></div>
+      <div class="check-list">
+        <div class="head"><div class="ink" style="font-size:14px;font-weight:500">Sections</div></div>
+        <div id="sections"></div>
+      </div>
+      <div class="row-toggle">
+        <div><div class="t">Clock</div><div class="s">Also sets times in the calendar and weather.</div></div>
+        <div class="seg" role="radiogroup" aria-label="Clock format" id="clock-fmt">
+          <button type="button" role="radio" data-value="12" aria-checked="true">12-hour</button>
+          <button type="button" role="radio" data-value="24" aria-checked="false">24-hour</button>
+        </div>
+      </div>
+      <div class="row-toggle">
+        <div><div class="t" id="sec-label">Show seconds</div><div class="s">Adds seconds to the large clock.</div></div>
+        <button type="button" class="switch" role="switch" aria-checked="false" aria-labelledby="sec-label" id="seconds"></button>
+      </div>
+      <div class="row-toggle">
+        <div><div class="t" id="accent-label">Accent color</div><div class="s">Used for highlights, charts and the browser tab icon. <b class="ink">A</b> (auto) is orange for the installed app and green in Test.</div></div>
+        <div class="swatches" role="radiogroup" aria-labelledby="accent-label" id="accents"></div>
+      </div>
+    </section>
+
+    <section class="card danger" id="danger" aria-labelledby="danger-h">
+      <h2 id="danger-h">Disable or reset</h2>
+      <div class="danger-row">
+        <span id="ic-power"></span>
+        <div class="grow"><span class="t">Disable the start page</span>
+          <span class="d">Stops the server and removes it from startup. Your connections and settings are kept, so you can turn it back on any time.</span></div>
+        <button type="button" class="btn btn-danger-outline" id="open-disable">Disable…</button>
+      </div>
+      <div class="danger-row">
+        <span id="ic-reset"></span>
+        <div class="grow"><span class="t">Reset to factory defaults</span>
+          <span class="d">Deletes your GitHub token, calendar addresses, location and every preference, then starts setup again. This can’t be undone.</span></div>
+        <button type="button" class="btn btn-danger" id="open-reset">Reset…</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<dialog class="dlg" id="dlg-disable" aria-labelledby="dlg-disable-h">
+  <h2 id="dlg-disable-h">Disable the start page?</h2>
+  <div class="stack">
+    <p style="font-size:14.5px;line-height:1.55">The page at <span class="chip" id="dis-url"></span> will stop loading. Nothing is deleted.</p>
+    <div style="display:flex;flex-direction:column;gap:8px" role="radiogroup" aria-label="How long">
+      <label class="radio-card"><input type="radio" name="dis" value="now"><span class="dot"></span>
+        <span class="body"><span class="t">Just stop it for now</span><span class="s" id="dis-now-sub">The server stops now and starts again the next time you sign in.</span></span></label>
+      <label class="radio-card"><input type="radio" name="dis" value="off" checked><span class="dot"></span>
+        <span class="body"><span class="t">Turn it off until I turn it back on</span><span class="s">Stops the server and removes it from startup.</span></span></label>
+    </div>
+    <div id="dis-info"></div>
+    <div id="dis-warn" style="display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.5;color:var(--muted)"></div>
+    <div id="dis-status"></div>
+    <div class="actions">
+      <button type="button" class="btn" data-close autofocus>Cancel</button>
+      <button type="button" class="btn btn-danger" id="do-disable">Disable start page</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="dlg" id="dlg-reset" aria-labelledby="dlg-reset-h">
+  <h2 id="dlg-reset-h">Reset to factory defaults?</h2>
+  <div class="stack">
+    <p style="font-size:14.5px;line-height:1.55">Your start page goes back to how it was first installed, and setup starts again. This can’t be undone.</p>
+    <div><div class="label" style="padding-bottom:6px">Deleted from config.json</div><div id="removed"></div></div>
+    <div class="check-list" id="dellogs-wrap"></div>
+    <div id="reset-info"></div>
+    <div class="field">
+      <label for="confirm">Type <span class="chip">reset</span> to confirm</label>
+      <div class="input-wrap"><input id="confirm" class="mono" autocomplete="off" spellcheck="false"></div>
+    </div>
+    <div id="reset-status"></div>
+    <div class="actions">
+      <button type="button" class="btn" data-close autofocus>Cancel</button>
+      <button type="button" class="btn btn-danger" id="do-reset" disabled>Reset and start setup</button>
+    </div>
+  </div>
+</dialog>
+
+<script src="/assets/shared.js"></script>
+<script src="/assets/settings.js"></script>
+</body>
+</html>
