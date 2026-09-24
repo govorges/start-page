@@ -787,4 +787,16 @@ function every(seconds, fn) {
   every(r.news, loadNews);
   every(r.github, loadGitHub);
   setInterval(() => { if (!document.hidden) loadActivity(); }, 15 * 60 * 1000); // daily charts change slowly
+  if (prefs.local) every(3600, loadUpdateBadge); // the server checks GitHub daily; this just reads its answer
 })();
+
+// "Update available!" next to the settings button, linking to the details in Settings.
+async function loadUpdateBadge() {
+  const u = await api.get('/api/updates').catch(() => null);
+  const badge = $('#update-badge');
+  badge.hidden = !(u && u.available);
+  if (!badge.hidden) {
+    badge.replaceChildren(icon('arrowUp', 13, 'var(--accent)', 2.5), 'Update available!');
+    badge.title = `Version ${u.latest} is available (you have ${u.current})`;
+  }
+}
