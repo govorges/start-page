@@ -64,3 +64,11 @@ section .sub { font-size: 13px; line-height: 1.5; color: var(--muted); margin-to
 .upd-commit .msg { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .upd-commit .meta { font: 11px var(--mono); color: var(--muted); flex-shrink: 0; }
 .upd-more { align-self: flex-start; font: 12px var(--mono); color: var(--muted); }
+.upd-manual { margin-top: 12px; font-size: 13px; line-height: 1.6; color: var(--text); }
+.upd-manual summary { cursor: pointer; width: fit-content; color: var(--muted); }
+.upd-manual summary:hover { color: var(--ink); }
+.upd-manual[open] summary { margin-bottom: 6px; }
+.upd-manual a { text-decoration: underline; }
+.upd-wait { font-size: 15px; line-height: 1.6; }
+.upd-back { margin-top: 12px; }
+.upd-back:hover { text-decoration: none; }
