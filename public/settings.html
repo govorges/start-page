@@ -34,6 +34,18 @@
       </div>
       <div class="tiles" id="tiles"></div>
       <div class="muted" style="font-size:13px" id="status-note"></div>
+      <div class="updates" id="updates">
+        <div class="upd-head">
+          <div class="grow"><div class="t">Updates</div><div class="s" id="upd-sub">Checking…</div></div>
+          <button type="button" class="btn btn-sm" id="upd-check">Check for updates</button>
+        </div>
+        <div id="upd-box"></div>
+        <div id="upd-changes" hidden></div>
+        <div class="row-toggle">
+          <div><div class="t" id="upd-auto-label">Check automatically</div><div class="s">Once a day, from GitHub. Updates are never installed for you.</div></div>
+          <button type="button" class="switch" role="switch" aria-checked="true" aria-labelledby="upd-auto-label" id="upd-auto"></button>
+        </div>
+      </div>
     </section>
 
     <section class="card" id="connections" aria-labelledby="conn-h" style="gap:10px">

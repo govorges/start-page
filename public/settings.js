@@ -63,6 +63,93 @@ function renderBanner() {
   $('#banner').style.gap = '12px';
 }
 
+// ---------- updates ----------
+let upd;
+const checkedText = t => { const a = ago(t); return a === 'now' ? 'checked just now' : /\d$/.test(a) ? `checked ${a} ago` : `checked ${a}`; };
+function renderUpdates() {
+  const u = upd;
+  const state = u.available ? `version ${u.latest} is available` : u.ahead ? 'newer than GitHub' : u.latest ? 'up to date' : null;
+  $('#upd-sub').textContent = [`Version ${u.current}`, state, u.checkedAt ? checkedText(u.checkedAt) : 'not checked yet'].filter(Boolean).join(' · ');
+  setSwitch($('#upd-auto'), u.auto);
+
+  let box = null;
+  if (u.error) {
+    box = statusBox('warn', 'Couldn’t check for updates', u.error);
+  } else if (u.available) {
+    box = statusBox('info', `Version ${u.latest} is available`, u.install === 'git'
+      ? rich(['To update, run ', ['chip', 'git pull'], ' in the Start Page folder, then run ', ['chip', 'install.bat'], ' again. Your settings are kept.'])
+      : rich(['To update, download the new version and copy its files over your Start Page folder, then run ', ['chip', 'install.bat'], ' again. Your settings are kept: ', ['chip', 'config.json'], ' isn’t in the download.']));
+    box.querySelector('div').append(h('div', { class: 'upd-actions' },
+      h('button', { type: 'button', class: 'btn btn-sm', id: 'upd-show', 'aria-expanded': String(!$('#upd-changes').hidden), onclick: toggleChanges }, 'See what’s changed'),
+      u.install === 'git' ? null : h('a', { class: 'btn btn-sm', href: u.zip }, 'Download ZIP'),
+      h('a', { class: 'btn btn-sm', href: u.repo, target: '_blank', rel: 'noopener' }, 'Open on GitHub')));
+  } else if (u.ahead) {
+    box = statusBox('info', `This copy is newer than GitHub (${u.latest})`, 'It has changes that aren’t on GitHub yet.');
+  }
+  $('#upd-box').replaceChildren(...(box ? [box] : []));
+  if (!u.available) $('#upd-changes').hidden = true;
+}
+
+async function toggleChanges() {
+  const list = $('#upd-changes');
+  const btn = $('#upd-show');
+  if (!list.hidden) { list.hidden = true; btn.setAttribute('aria-expanded', 'false'); return; }
+  list.hidden = false;
+  btn.setAttribute('aria-expanded', 'true');
+  list.replaceChildren(statusBox('busy', 'Loading the list of changes…'));
+  try {
+    list.replaceChildren(...renderChanges(await api.get('/api/updates/changes')));
+  } catch (e) {
+    list.replaceChildren(statusBox('warn', 'Couldn’t load the list of changes', e.message));
+  }
+}
+
+function renderChanges(c) {
+  const out = [];
+  if (c.note) out.push(h('div', { class: 'upd-note' }, c.note));
+  if (!c.groups.length) out.push(h('div', { class: 'upd-note' }, 'No changes found.'));
+  for (const g of c.groups) {
+    const mine = g.version === c.current;
+    const label = !mine ? `Version ${g.version}` : g.maybeHave ? `Version ${g.version} (some of these may already be in your copy)` : `More in version ${g.version}, your version`;
+    out.push(h('div', { class: 'upd-group' },
+      h('div', { class: 'upd-ver' }, label, h('span', null, `${g.commits.length} commit${g.commits.length === 1 ? '' : 's'}`)),
+      ...g.commits.map(x => h('a', { class: 'upd-commit', href: x.url, target: '_blank', rel: 'noopener' },
+        h('span', { class: 'sha' }, x.sha), h('span', { class: 'msg' }, x.title),
+        h('span', { class: 'meta' }, [x.author, ago(x.date)].filter(Boolean).join(' · '))))));
+  }
+  out.push(h('a', { class: 'upd-more', href: c.compareUrl, target: '_blank', rel: 'noopener' },
+    c.truncated ? 'Only the first 250 commits are shown. See them all on GitHub →' : 'Compare on GitHub →'));
+  return out;
+}
+
+$('#upd-check').addEventListener('click', async e => {
+  const btn = e.currentTarget;
+  btn.disabled = true;
+  btn.textContent = 'Checking…';
+  try {
+    upd = await api.post('/api/updates/check');
+    renderUpdates();
+    if (!upd.error && !upd.available) toast(upd.ahead ? 'This copy is newer than GitHub' : 'You’re up to date');
+  } catch (err) {
+    toast(err.message);
+  }
+  btn.disabled = false;
+  btn.textContent = 'Check for updates';
+});
+bindSwitch($('#upd-auto'), async on => {
+  try { cfg = (await api.post('/api/config', { updates: { auto: on } })).config; upd.auto = on; toast(on ? 'Checks for updates daily' : 'Automatic update checks off'); }
+  catch (e) { toast(e.message); setSwitch($('#upd-auto'), !on); }
+});
+
+async function loadUpdates() {
+  try { upd = await api.get('/api/updates'); } catch (e) { $('#upd-sub').textContent = 'Couldn’t read the update status: ' + e.message; return; }
+  // Never checked (a new install): check now so the section has something to say.
+  if (!upd.checkedAt) upd = await api.post('/api/updates/check').catch(() => upd);
+  renderUpdates();
+  // Arrived from the dashboard's "Update available" badge: show what's changed right away.
+  if (location.hash === '#updates' && upd.available) toggleChanges();
+}
+
 async function restart() {
   const url = status.savedUrl;
   toast('Restarting…');
@@ -250,5 +337,6 @@ $('#do-reset').addEventListener('click', async () => {
   renderBanner();
   renderConnections();
   renderDashboard();
+  loadUpdates();
   setInterval(renderStatus, 30000);
 })();

@@ -45,3 +45,22 @@ section .sub { font-size: 13px; line-height: 1.5; color: var(--muted); margin-to
   .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .bar { padding: 0 16px; }
 }
+.updates { display: flex; flex-direction: column; gap: 12px; padding-top: 14px; border-top: 1px solid var(--line3); scroll-margin-top: 24px; }
+.upd-head { display: flex; align-items: center; gap: 12px; }
+.upd-head .grow { flex: 1; min-width: 0; }
+.upd-head .t { font-size: 14px; font-weight: 500; color: var(--ink); }
+.upd-head .s { font: 11.5px var(--mono); color: var(--muted); margin-top: 3px; }
+.upd-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.upd-actions a.btn:hover { text-decoration: none; }
+#upd-changes { display: flex; flex-direction: column; gap: 14px; }
+#upd-changes[hidden] { display: none; }
+.upd-note { font-size: 13px; line-height: 1.5; color: var(--muted); }
+.upd-group { display: flex; flex-direction: column; }
+.upd-ver { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 6px; font-size: 13.5px; font-weight: 500; color: var(--ink); }
+.upd-ver span { font: 11px var(--mono); font-weight: 400; color: var(--muted); }
+.upd-commit { display: flex; align-items: baseline; gap: 12px; padding: 7px 0; border-top: 1px solid var(--line3); font-size: 13.5px; color: var(--text); }
+.upd-commit:hover { text-decoration: none; color: var(--ink); }
+.upd-commit .sha { font: 11.5px var(--mono); color: var(--accent); flex-shrink: 0; }
+.upd-commit .msg { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.upd-commit .meta { font: 11px var(--mono); color: var(--muted); flex-shrink: 0; }
+.upd-more { align-self: flex-start; font: 12px var(--mono); color: var(--muted); }
