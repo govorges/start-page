@@ -88,7 +88,7 @@ $('#stop').addEventListener('click', async () => {
 
 function showStopped(title, body) {
   document.body.replaceChildren(h('div', { class: 'stopped' },
-    h('div', { class: 'brand' }, h('div', { class: 'mark' }, '~/'), 'start'),
+    h('div', { class: 'brand' }, h('div', { class: 'mark' }, '~/'), 'Start Page'),
     h('h1', null, title), h('p', { style: { fontSize: '15px', lineHeight: 1.6 } }, body),
     h('div', { class: 'cmdline', style: { display: 'flex', gap: '10px', alignItems: 'center', padding: '12px 14px', borderRadius: '3px', background: 'var(--bar)', border: '1px solid var(--line)' } },
       icon('term', 16, 'var(--accent)', 2), h('code', { class: 'mono', style: { fontSize: '12.5px', color: 'var(--ink)', overflowWrap: 'anywhere' } }, 'Start menu  ›  Start Page'))));
