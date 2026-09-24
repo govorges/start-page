@@ -1,6 +1,6 @@
 {
   "name": "start-page",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A local browser start page: clock, weather, calendar, news and GitHub.",
   "main": "server.js",
   "private": true,
