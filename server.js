@@ -244,9 +244,24 @@ const routes = {
     return { ok: true };
   },
   // ---- updates (the dashboard shows a badge; Settings shows the details) ----
-  'GET /api/updates': () => ({ ...updates.status(), auto: cfg.updates.auto }),
-  'POST /api/updates/check': async () => ({ ...(await updates.check()), auto: cfg.updates.auto }),
+  // ?details=1 (Settings) also says why "Update now" can't run here; the dashboard badge skips that, since it asks Git.
+  'GET /api/updates': (req, q) => {
+    const u = updates.status();
+    return { ...u, auto: cfg.updates.auto, problem: u.available && q.get('details') ? updates.installProblem() : null };
+  },
+  'POST /api/updates/check': async () => {
+    const u = await updates.check();
+    return { ...u, auto: cfg.updates.auto, problem: u.available ? updates.installProblem() : null };
+  },
   'GET /api/updates/changes': () => updates.changes(),
+  // Closes Start Page and runs update.bat, which updates it and starts it again.
+  'POST /api/updates/install': (req, body, res) => {
+    const problem = updates.installProblem();
+    if (problem) throw new updates.UpdateError(problem);
+    updates.launch(ENV);
+    send(res, 200, { ok: true, version: VERSION });
+    shutdown(0);
+  },
 
   'GET /api/news': async () => {
     const [ap, local] = await Promise.allSettled([
