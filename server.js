@@ -12,6 +12,7 @@ const calendar = require('./lib/calendar');
 const github = require('./lib/github');
 const news = require('./lib/news');
 const weather = require('./lib/weather');
+const updates = require('./lib/updates');
 
 const PUBLIC = path.join(__dirname, 'public');
 const VERSION = require('./package.json').version;
@@ -242,6 +243,26 @@ const routes = {
     cache.delete('github');
     return { ok: true };
   },
+  // ---- updates (the dashboard shows a badge; Settings shows the details) ----
+  // ?details=1 (Settings) also says why "Update now" can't run here; the dashboard badge skips that, since it asks Git.
+  'GET /api/updates': (req, q) => {
+    const u = updates.status();
+    return { ...u, auto: cfg.updates.auto, problem: u.available && q.get('details') ? updates.installProblem() : null };
+  },
+  'POST /api/updates/check': async () => {
+    const u = await updates.check();
+    return { ...u, auto: cfg.updates.auto, problem: u.available ? updates.installProblem() : null };
+  },
+  'GET /api/updates/changes': () => updates.changes(),
+  // Closes Start Page and runs update.bat, which updates it and starts it again.
+  'POST /api/updates/install': (req, body, res) => {
+    const problem = updates.installProblem();
+    if (problem) throw new updates.UpdateError(problem);
+    updates.launch(ENV);
+    send(res, 200, { ok: true, version: VERSION });
+    shutdown(0);
+  },
+
   'GET /api/news': async () => {
     const [ap, local] = await Promise.allSettled([
       cfg.news.ap ? cached('ap', cfg.refresh.news, news.ap) : Promise.resolve([]),
@@ -256,7 +277,7 @@ const routes = {
 };
 
 // Pages and APIs that expose or change settings are only for this computer.
-const LOCAL_ONLY = /^(GET|POST) \/api\/(config|status|port-check|server|show-config|finish-setup|test|news\/suggestions)/;
+const LOCAL_ONLY = /^(GET|POST) \/api\/(config|status|port-check|server|show-config|finish-setup|test|news\/suggestions|updates)/;
 
 async function handle(req, res) {
   if (!hostAllowed(req)) return fail(res, 421, 'Unknown host name.');
@@ -303,7 +324,7 @@ async function handle(req, res) {
     const out = await route(req, req.method === 'GET' ? url.searchParams : body, res);
     if (out !== undefined && !res.headersSent) send(res, 200, out);
   } catch (e) {
-    const expected = e instanceof calendar.CalendarError || e instanceof news.FeedError || e instanceof github.GitHubError;
+    const expected = e instanceof calendar.CalendarError || e instanceof news.FeedError || e instanceof github.GitHubError || e instanceof updates.UpdateError;
     if (!expected) console.error(key, e);
     if (!res.headersSent) fail(res, expected ? 422 : 502, e.message);
   }
@@ -337,6 +358,7 @@ server.listen(PORT, HOST, () => {
   if (flag('open') || (cfg.server.openBrowser && !RESTARTED)) system.openBrowser(localUrl());
   // Keep an existing start-at-sign-in shortcut in the current, windowless format.
   if (!RESTARTED && cfg.setupComplete && cfg.server.runMode === 'signin') system.refreshSignin();
+  updates.schedule(() => cfg.updates.auto);
   if (process.send) process.send('ready'); // launcher.js shows the tray icon now
 });
 // Started by launcher.js and it went away (for example ended from Task Manager): stop too.

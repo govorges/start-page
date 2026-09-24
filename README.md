@@ -34,7 +34,12 @@ The Settings page shows whether Start Page is running and lets you edit each con
 
 ### Updating and uninstalling
 
-- **To update,** download the new version into the same folder, or run `git pull`, then run `install.bat` again. Your settings are kept.
+- **To find out about updates,** look at the dashboard. Start Page checks GitHub once a day, and **Update available!** appears next to the settings button when there's a new version. It never installs anything by itself. Go to **Settings > Status > Updates** to check right away, see the list of changes since your version, or turn off the daily check.
+- **To update,** click **Update now** in **Settings > Status > Updates**. Start Page closes, and a window shows the update as it downloads and installs. Then Start Page opens again on the new version. Your settings are kept.
+  - **To update without opening Settings,** double-click `update.bat` in the Start Page folder. It does the same thing.
+  - **To update by hand,** run `git pull` if you cloned the repository, or download the new ZIP and copy its files over your Start Page folder. Then run `install.bat` again.
+  - `update.bat` uses `git pull` if you cloned the repository, so it only runs on the `main` branch with no uncommitted changes. Otherwise it downloads the latest ZIP and copies it over your folder without touching `config.json`.
+  - If you chose **Always on** during setup, run `update.bat` yourself. In that mode, Start Page runs in the background as Windows itself and can't open the update window.
 - **To uninstall,** find Start Page in **Settings > Apps** and uninstall it, or run `install.bat /uninstall`. This removes the shortcuts, the tray icon and the start-up entry. It leaves the Start Page folder and your settings in place, so delete the folder too if you want to remove everything.
 
 ## Your data and privacy
@@ -47,7 +52,7 @@ Start Page only accepts connections from your own PC. Your GitHub token is never
 - **National Weather Service** for weather alerts
 - **Google Calendar**
 - **Google News**, AP and local news feeds
-- **GitHub**
+- **GitHub**, for your GitHub panel and the daily update check
 
 ## For developers
 

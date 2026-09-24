@@ -63,6 +63,132 @@ function renderBanner() {
   $('#banner').style.gap = '12px';
 }
 
+// ---------- updates ----------
+let upd;
+const checkedText = t => { const a = ago(t); return a === 'now' ? 'checked just now' : /\d$/.test(a) ? `checked ${a} ago` : `checked ${a}`; };
+function renderUpdates() {
+  const u = upd;
+  const state = u.available ? `version ${u.latest} is available` : u.ahead ? 'newer than GitHub' : u.latest ? 'up to date' : null;
+  $('#upd-sub').textContent = [`Version ${u.current}`, state, u.checkedAt ? checkedText(u.checkedAt) : 'not checked yet'].filter(Boolean).join(' · ');
+  setSwitch($('#upd-auto'), u.auto);
+
+  let box = null;
+  if (u.error) {
+    box = statusBox('warn', 'Couldn’t check for updates', u.error);
+  } else if (u.available) {
+    box = statusBox(u.problem ? 'warn' : 'info', `Version ${u.latest} is available`, u.problem
+      ? [u.problem, ' Update manually below once that’s sorted.']
+      : 'Update now closes Start Page, installs the update in a new window and opens Start Page again. Your settings are kept.');
+    box.querySelector('div').append(
+      h('div', { class: 'upd-actions' },
+        u.problem ? null : h('button', { type: 'button', class: 'btn btn-sm btn-primary', id: 'upd-now', onclick: updateNow }, 'Update now'),
+        h('button', { type: 'button', class: 'btn btn-sm', id: 'upd-show', 'aria-expanded': String(!$('#upd-changes').hidden), onclick: toggleChanges }, 'See what’s changed'),
+        h('a', { class: 'btn btn-sm', href: u.repo, target: '_blank', rel: 'noopener' }, 'Open on GitHub')),
+      h('details', { class: 'upd-manual' }, h('summary', null, 'Update manually'),
+        h('div', null, ...rich(['Double-click ', ['chip', 'update.bat'], ' in the Start Page folder. It does the same as Update now.'])),
+        u.install === 'git'
+          ? h('div', null, ...rich(['Or run ', ['chip', 'git pull'], ' in the Start Page folder, then run ', ['chip', 'install.bat'], '.']))
+          : h('div', null, 'Or ', h('a', { href: u.zip }, 'download the ZIP'), ', copy its files over your Start Page folder, then run ',
+            h('span', { class: 'chip' }, 'install.bat'), '. ', h('span', { class: 'chip' }, 'config.json'), ' isn’t in the download, so your settings are kept.')));
+  } else if (u.ahead) {
+    box = statusBox('info', `This copy is newer than GitHub (${u.latest})`, 'It has changes that aren’t on GitHub yet.');
+  }
+  $('#upd-box').replaceChildren(...(box ? [box] : []));
+  if (!u.available) $('#upd-changes').hidden = true;
+}
+
+async function toggleChanges() {
+  const list = $('#upd-changes');
+  const btn = $('#upd-show');
+  if (!list.hidden) { list.hidden = true; btn.setAttribute('aria-expanded', 'false'); return; }
+  list.hidden = false;
+  btn.setAttribute('aria-expanded', 'true');
+  list.replaceChildren(statusBox('busy', 'Loading the list of changes…'));
+  try {
+    list.replaceChildren(...renderChanges(await api.get('/api/updates/changes')));
+  } catch (e) {
+    list.replaceChildren(statusBox('warn', 'Couldn’t load the list of changes', e.message));
+  }
+}
+
+function renderChanges(c) {
+  const out = [];
+  if (c.note) out.push(h('div', { class: 'upd-note' }, c.note));
+  if (!c.groups.length) out.push(h('div', { class: 'upd-note' }, 'No changes found.'));
+  for (const g of c.groups) {
+    const mine = g.version === c.current;
+    const label = !mine ? `Version ${g.version}` : g.maybeHave ? `Version ${g.version} (some of these may already be in your copy)` : `More in version ${g.version}, your version`;
+    out.push(h('div', { class: 'upd-group' },
+      h('div', { class: 'upd-ver' }, label, h('span', null, `${g.commits.length} commit${g.commits.length === 1 ? '' : 's'}`)),
+      ...g.commits.map(x => h('a', { class: 'upd-commit', href: x.url, target: '_blank', rel: 'noopener' },
+        h('span', { class: 'sha' }, x.sha), h('span', { class: 'msg' }, x.title),
+        h('span', { class: 'meta' }, [x.author, ago(x.date)].filter(Boolean).join(' · '))))));
+  }
+  out.push(h('a', { class: 'upd-more', href: c.compareUrl, target: '_blank', rel: 'noopener' },
+    c.truncated ? 'Only the first 250 commits are shown. See them all on GitHub →' : 'Compare on GitHub →'));
+  return out;
+}
+
+$('#upd-check').addEventListener('click', async e => {
+  const btn = e.currentTarget;
+  btn.disabled = true;
+  btn.textContent = 'Checking…';
+  try {
+    upd = await api.post('/api/updates/check');
+    renderUpdates();
+    if (!upd.error && !upd.available) toast(upd.ahead ? 'This copy is newer than GitHub' : 'You’re up to date');
+  } catch (err) {
+    toast(err.message);
+  }
+  btn.disabled = false;
+  btn.textContent = 'Check for updates';
+});
+bindSwitch($('#upd-auto'), async on => {
+  try { cfg = (await api.post('/api/config', { updates: { auto: on } })).config; upd.auto = on; toast(on ? 'Checks for updates daily' : 'Automatic update checks off'); }
+  catch (e) { toast(e.message); setSwitch($('#upd-auto'), !on); }
+});
+
+// Start Page closes and update.bat takes over in its own window; this page waits for the new version.
+async function updateNow(e) {
+  const btn = e.currentTarget;
+  btn.disabled = true;
+  btn.textContent = 'Starting the update…';
+  let r;
+  try { r = await api.post('/api/updates/install'); } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Update now';
+    $('#upd-box').prepend(statusBox('err', 'Couldn’t start the update', err.message));
+    return;
+  }
+  const note = h('div', null, statusBox('busy', 'Waiting for the update to finish…'));
+  document.body.replaceChildren(h('div', { class: 'stopped' },
+    h('div', { class: 'brand' }, h('div', { class: 'mark' }, '~/'), 'Start Page'),
+    h('h1', null, `Updating to version ${upd.latest}`),
+    h('p', { class: 'upd-wait' }, 'Start Page closed, and a window called “Start Page update” shows the progress. When it’s done, ',
+      status.env === 'test' ? 'start.bat opens the test copy again' : 'Start Page opens again', ' and this page reloads by itself.'),
+    note));
+  // Reload once the server is back. The same version coming back means the update didn't finish.
+  let wentDown = false;
+  for (let i = 0; i < 450; i++) { // up to 15 minutes
+    await new Promise(res => setTimeout(res, 2000));
+    const ping = await fetch('/api/ping', { cache: 'no-store' }).then(x => x.json()).catch(() => null);
+    if (!ping) { wentDown = true; continue; }
+    if (ping.version !== r.version) { location.href = '/settings#updates'; return; }
+    if (wentDown) break;
+  }
+  note.replaceChildren(statusBox('warn', 'The update didn’t finish', 'Start Page is running the version you had. The update window says what went wrong.'),
+    h('a', { class: 'btn btn-sm upd-back', href: '/settings#updates' }, 'Back to Settings'));
+}
+
+async function loadUpdates() {
+  try { upd = await api.get('/api/updates?details=1'); } catch (e) { $('#upd-sub').textContent = 'Couldn’t read the update status: ' + e.message; return; }
+  // Never checked (a new install): check now so the section has something to say.
+  if (!upd.checkedAt) upd = await api.post('/api/updates/check').catch(() => upd);
+  renderUpdates();
+  // Arrived from the dashboard's "Update available" badge: show what's changed right away.
+  if (location.hash === '#updates' && upd.available) toggleChanges();
+}
+
 async function restart() {
   const url = status.savedUrl;
   toast('Restarting…');
@@ -250,5 +376,6 @@ $('#do-reset').addEventListener('click', async () => {
   renderBanner();
   renderConnections();
   renderDashboard();
+  loadUpdates();
   setInterval(renderStatus, 30000);
 })();

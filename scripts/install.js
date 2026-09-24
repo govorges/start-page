@@ -90,7 +90,11 @@ async function install() {
   for (const [name, type, data] of values) await run('reg.exe', ['add', APPS_KEY, '/v', name, '/t', type, '/d', data, '/f']);
 
   console.log('  Starting Start Page...');
-  if (asService && await ping(port)) system.openBrowser(`http://localhost:${port}`);
+  if (asService && await ping(port)) {
+    // The background task keeps running: restart its server so it uses these files (after an update).
+    await fetch(`http://127.0.0.1:${port}/api/server/restart`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }).catch(() => {});
+    system.openBrowser(`http://localhost:${port}`);
+  }
   else spawn('explorer.exe', [lnk.startMenu], { detached: true, stdio: 'ignore' }).unref();
 
   console.log('');
