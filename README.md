@@ -34,6 +34,7 @@ The Settings page shows whether Start Page is running and lets you edit each con
 
 ### Updating and uninstalling
 
+- **To find out about updates,** look at the dashboard. Start Page checks GitHub once a day, and **Update available!** appears next to the settings button when there's a new version. It never installs anything by itself. Go to **Settings > Status > Updates** to check right away, see the list of changes since your version, or turn off the daily check.
 - **To update,** download the new version into the same folder, or run `git pull`, then run `install.bat` again. Your settings are kept.
 - **To uninstall,** find Start Page in **Settings > Apps** and uninstall it, or run `install.bat /uninstall`. This removes the shortcuts, the tray icon and the start-up entry. It leaves the Start Page folder and your settings in place, so delete the folder too if you want to remove everything.
 
@@ -47,7 +48,7 @@ Start Page only accepts connections from your own PC. Your GitHub token is never
 - **National Weather Service** for weather alerts
 - **Google Calendar**
 - **Google News**, AP and local news feeds
-- **GitHub**
+- **GitHub**, for your GitHub panel and the daily update check
 
 ## For developers
 
