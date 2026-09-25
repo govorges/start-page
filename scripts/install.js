@@ -66,7 +66,11 @@ async function install() {
 
   console.log('  Preparing the Start Page programs...');
   const app = await ensureAppExe(process.execPath);
-  if (path.basename(app).toLowerCase() !== 'startpage.exe') throw new Error('StartPage.exe couldn’t be built (see the message above).');
+  if (path.basename(app).toLowerCase() !== 'startpage.exe') {
+    // Built but blocked (Smart App Control), or couldn't be built: Node runs Start Page just the same.
+    console.log('  Start Page will run as Node.js instead (see the message above). It works the same;');
+    console.log('  Task Manager just lists it as "Node.js JavaScript Runtime".');
+  }
   if (!await ensureTray()) console.log('  (No tray icon: see the message above. Everything else works.)');
 
   console.log('  Adding shortcuts to the Start menu and the desktop...');

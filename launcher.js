@@ -44,9 +44,29 @@ function onTray(command) {
 
 function run(args, restarted) {
   startedAt = Date.now();
-  const child = server = spawn(program, [SERVER, ...args], {
-    stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
-    env: { ...process.env, START_PAGE_SUPERVISED: '1', START_PAGE_ENV: ENV, ...(restarted ? { START_PAGE_RESTARTED: '1' } : {}) },
+  // Windows can start blocking StartPage.exe later (Smart App Control decides file by file; a blocked
+  // program makes spawn throw): run the server with this launcher's own program instead, which is
+  // already allowed to run.
+  const cantStart = e => {
+    if (program === process.execPath) { console.error('Couldn’t start the server:', e.message); process.exit(1); }
+    console.warn(`Couldn’t start ${path.basename(program)} (${e.message}), so Node will be used directly.`);
+    program = process.execPath;
+    run(args, restarted);
+  };
+  let child;
+  try {
+    child = server = spawn(program, [SERVER, ...args], {
+      stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
+      env: { ...process.env, START_PAGE_SUPERVISED: '1', START_PAGE_ENV: ENV, ...(restarted ? { START_PAGE_RESTARTED: '1' } : {}) },
+    });
+  } catch (e) {
+    return cantStart(e);
+  }
+  child.on('error', e => {
+    if (child.pid) return console.error('Server error:', e.message);
+    process.removeListener('SIGINT', forward);
+    process.removeListener('SIGTERM', forward);
+    cantStart(e);
   });
   // The server says 'ready' once it's listening; only then does the tray icon appear (so a second copy
   // that finds the port taken never flashes one).
@@ -58,6 +78,7 @@ function run(args, restarted) {
   process.once('SIGTERM', forward);
 
   child.on('exit', code => {
+    if (!child.pid) return; // never started: the 'error' handler above deals with it
     server = null;
     process.removeListener('SIGINT', forward);
     process.removeListener('SIGTERM', forward);
