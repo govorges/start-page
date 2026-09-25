@@ -84,8 +84,11 @@ function installDependencies() {
   const npm = process.env.NPM_CMD;
   if (!npm) throw new Stop('npm wasn’t found next to Node.js, so the new dependencies couldn’t be installed. Run install.bat.');
   say('Installing updated dependencies...');
-  // cmd /s /c removes the outer pair of quotes, so the quoted npm path (often under "Program Files") survives.
-  const r = spawnSync('cmd.exe', ['/d', '/s', '/c', `""${npm}" install --omit=dev --no-audit --no-fund --loglevel=error"`],
+  // npm ci installs exactly what package-lock.json lists and never rewrites it (npm install would, whenever
+  // its version differs from package.json's, leaving a Git clone with uncommitted changes that block the
+  // next update). cmd /s /c removes the outer pair of quotes, so the quoted npm path survives.
+  const cmd = fs.existsSync(path.join(ROOT, 'package-lock.json')) ? 'ci' : 'install';
+  const r = spawnSync('cmd.exe', ['/d', '/s', '/c', `""${npm}" ${cmd} --omit=dev --no-audit --no-fund --loglevel=error"`],
     { cwd: ROOT, stdio: 'inherit', windowsVerbatimArguments: true });
   if (r.status !== 0) throw new Stop('Installing dependencies failed. Check your internet connection and run update.bat again.');
 }

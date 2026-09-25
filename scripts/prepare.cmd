@@ -56,7 +56,10 @@ if not defined NPM_CMD (
 )
 echo   Installing dependencies (first run only)...
 pushd "%SP_ROOT%"
-call "%NPM_CMD%" install --omit=dev --no-audit --no-fund --loglevel=error
+rem npm ci installs what package-lock.json lists without rewriting it (keeps Git clones free of changes).
+set "NPM_VERB=install"
+if exist "%SP_ROOT%\package-lock.json" set "NPM_VERB=ci"
+call "%NPM_CMD%" %NPM_VERB% --omit=dev --no-audit --no-fund --loglevel=error
 set "NPM_ERR=%errorlevel%"
 popd
 if not "%NPM_ERR%"=="0" (
